@@ -1,6 +1,6 @@
 """
 Orchestration: sanitize → decompose → leak-check → remote → recombine.
-Fail-closed: if leak check fails twice, answer with Tinfoil only (no splitting).
+Fail-closed: if leak check fails twice, answer with Near AI only (no splitting).
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ from query_router.leak_check import (
     cross_fragment_check,
 )
 from query_router.recombine import local_fallback, recombine
-from query_router.remote import RemoteAnswer, send as remote_send
+from query_router.remote import DEFAULT_INCOGNITO_MODELS, RemoteAnswer, send as remote_send
 from query_router.sanitize import SanitizedQuery, sanitize, sanitize_with_llm_entities
 
 
@@ -35,21 +35,21 @@ class RouterResult:
 # LLM judge helpers
 # ---------------------------------------------------------------------------
 
-async def _llm_leak_judge(fragment_text: str) -> bool:
-    """Ask Tinfoil LLM if a fragment could identify a specific person/org/situation."""
+async def _llm_leak_judge(fragment_text: str, model: str | None = None) -> bool:
+    """Ask Near AI LLM if a fragment could identify a specific person/org/situation."""
     prompt = prompts.LEAK_JUDGE.format(fragment=fragment_text)
     messages = [{"role": "user", "content": prompt}]
-    resp = await local_llm.chat(messages, temperature=0.0, max_tokens=10)
+    resp = await local_llm.chat(messages, temperature=0.0, max_tokens=10, model=model)
     return resp.strip().lower().startswith("yes")
 
 
-async def _llm_cross_judge(fragment_texts: list[str]) -> list[str]:
-    """Ask Tinfoil LLM to reconstruct entities from fragments."""
+async def _llm_cross_judge(fragment_texts: list[str], model: str | None = None) -> list[str]:
+    """Ask Near AI LLM to reconstruct entities from fragments."""
     numbered = "\n".join(f"{i+1}. {f}" for i, f in enumerate(fragment_texts))
     prompt = prompts.CROSS_FRAGMENT_ADVERSARY.format(fragments=numbered)
     messages = [{"role": "user", "content": prompt}]
     try:
-        result = await local_llm.chat_json(messages, temperature=0.0)
+        result = await local_llm.chat_json(messages, temperature=0.0, model=model)
         if isinstance(result, list):
             return [str(x) for x in result]
     except Exception:
@@ -57,12 +57,12 @@ async def _llm_cross_judge(fragment_texts: list[str]) -> list[str]:
     return []
 
 
-async def _detect_entities_llm(query: str) -> list[tuple[str, str]]:
-    """Use Tinfoil LLM to detect entities for sanitization."""
+async def _detect_entities_llm(query: str, model: str | None = None) -> list[tuple[str, str]]:
+    """Use Near AI LLM to detect entities for sanitization."""
     prompt = prompts.ENTITY_DETECTION.format(query=query)
     messages = [{"role": "user", "content": prompt}]
     try:
-        result = await local_llm.chat_json(messages, temperature=0.0)
+        result = await local_llm.chat_json(messages, temperature=0.0, model=model)
         if isinstance(result, list):
             return [(e["category"], e["value"]) for e in result if "category" in e and "value" in e]
     except Exception:
@@ -76,15 +76,20 @@ async def _detect_entities_llm(query: str) -> list[tuple[str, str]]:
 
 async def route(
     query: str,
+    models: list[str] | None = None,
     use_llm_sanitize: bool = True,
     use_llm_judges: bool = True,
     remote_send_fn=None,
 ) -> RouterResult:
     """Run the full split-and-route pipeline.
 
+    models: list of three incognito model names — each fragment is sent to a
+            different model so no single provider sees all fragments.
+            Decomposition and recombination use the attested model (NEARAI_MODEL).
+            If None, all fragments use the NEARAI_INCOGNITO_MODEL env-var default.
     remote_send_fn: override for testing (default: remote.send).
     """
-    send_fn = remote_send_fn or remote_send
+    send_fn = remote_send_fn
 
     # Step 1: Sanitize
     llm_entities = None
@@ -135,13 +140,17 @@ async def route(
             last_failure_reason = cross_reason or "Cross-fragment check failed"
             continue
 
-        # All checks passed — send fragments remotely
+        # All checks passed — send each fragment to a different incognito model
         remote_answers: list[RemoteAnswer] = []
-        for sf in safe_fragments:
-            answer = await send_fn(sf)
+        for i, sf in enumerate(safe_fragments):
+            if send_fn:
+                answer = await send_fn(sf)
+            else:
+                frag_model = models[i % len(models)] if models else DEFAULT_INCOGNITO_MODELS[i % len(DEFAULT_INCOGNITO_MODELS)]
+                answer = await remote_send(sf, model=frag_model)
             remote_answers.append(answer)
 
-        # Recombine
+        # Recombine (uses attested model)
         final_answer = await recombine(sanitized, remote_answers)
 
         return RouterResult(
@@ -151,7 +160,7 @@ async def route(
             fragment_answers=remote_answers,
         )
 
-    # FAIL CLOSED: two attempts failed, use Tinfoil directly (no splitting)
+    # FAIL CLOSED: two attempts failed, use Near AI directly (no splitting)
     fallback_answer = await local_fallback(query)
     return RouterResult(
         answer=fallback_answer,

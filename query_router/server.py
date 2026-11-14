@@ -20,7 +20,7 @@ from pydantic import BaseModel
 from query_router.router import RouterResult, route
 from query_router.trace import trace as run_trace
 
-app = FastAPI(title="Query Router – Tier 1 (Splittable)")
+app = FastAPI(title="Query Sharding – Tier 1 (Splittable)")
 
 # Mount static files for the presentation UI
 _static_dir = pathlib.Path(__file__).parent / "static"
@@ -58,6 +58,7 @@ class ChatMessage(BaseModel):
 class ChatCompletionRequest(BaseModel):
     model: str = "query-router"
     messages: List[ChatMessage]
+    models: List[str] | None = None  # 3 incognito models, one per fragment
     temperature: float = 0.7
     max_tokens: int = 2048
 
@@ -93,9 +94,9 @@ async def chat_completions(req: ChatCompletionRequest) -> ChatCompletionResponse
     request_id = f"chatcmpl-{uuid.uuid4().hex[:12]}"
 
     # Route through the pipeline
-    result: RouterResult = await route(query)
+    result: RouterResult = await route(query, models=req.models)
 
-    # Log what was sent to Darkbloom (NEVER log original query or placeholder map)
+    # Log what was sent to Incognito (NEVER log original query or placeholder map)
     entry = ProviderLogEntry(
         request_id=request_id,
         timestamp=time.time(),
@@ -123,7 +124,7 @@ async def chat_completions(req: ChatCompletionRequest) -> ChatCompletionResponse
 async def provider_log():
     """Return recent provider interactions.
 
-    Shows ONLY what was sent to Darkbloom and their responses.
+    Shows ONLY what was sent to Incognito and their responses.
     NEVER contains the original query or placeholder map.
     """
     return [

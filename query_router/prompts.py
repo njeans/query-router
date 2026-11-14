@@ -1,5 +1,5 @@
 """
-All prompts for the Tinfoil LLM, centralised for easy tuning.
+All prompts for the Near AI LLM, centralised for easy tuning.
 """
 
 # ---------------------------------------------------------------------------
@@ -114,7 +114,7 @@ Use the placeholder tokens (like [PERSON_1], [COMPANY_1]) when referring \
 to specific entities — they will be replaced with real values afterward."""
 
 # ---------------------------------------------------------------------------
-# Fallback (Tinfoil-only, no splitting)
+# Fallback (Near AI-only, no splitting)
 # ---------------------------------------------------------------------------
 
 LOCAL_FALLBACK = """\

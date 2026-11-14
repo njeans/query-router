@@ -157,6 +157,67 @@ def _identify_fixture(query: str) -> str | None:
 # Pipeline trace
 # ---------------------------------------------------------------------------
 
+def _mock_attestation() -> dict:
+    """Pre-canned attestation data for offline demos."""
+    return {
+        "tee": {
+            "verified": True,
+            "model_id": "nearai/glm-5.3-flash",
+            "enclave": {
+                "type": "Intel TDX + NVIDIA H100 CC",
+                "measurement": "sha256:a3f8c9d1e4b72f6a9c8d3e5f7a1b4c6d8e0f2a4b6c8d0e1f3a5b7c9d1e3f5a7",
+                "firmware": "TDX Module 1.5.06",
+            },
+            "certificate": {
+                "issuer": "Intel SGX Attestation Service",
+                "valid_from": "2025-01-15T00:00:00Z",
+                "valid_to": "2027-01-15T00:00:00Z",
+                "chain_verified": True,
+            },
+            "e2ee": {
+                "protocol": "TLS 1.3 + enclave binding",
+                "key_exchange": "X25519",
+                "verified": True,
+            },
+        },
+        "incognito_router": {
+            "verified": True,
+            "gateway": "Near AI Cloud Gateway",
+            "routing": {
+                "fragment_isolation": True,
+                "no_shared_context": True,
+                "no_linking_metadata": True,
+            },
+            "certificate": {
+                "issuer": "Near AI Gateway CA",
+                "valid_from": "2025-06-01T00:00:00Z",
+                "valid_to": "2027-06-01T00:00:00Z",
+                "chain_verified": True,
+            },
+        },
+    }
+
+
+async def _live_attestation(model_id: str) -> dict:
+    """Fetch real attestation reports from Near AI."""
+    from query_router.attestation import verify_tee, verify_incognito_router
+
+    tee_result = await verify_tee(model_id)
+    router_result = await verify_incognito_router()
+    return {
+        "tee": {
+            "verified": tee_result.verified,
+            **(tee_result.details if tee_result.verified else {}),
+            **({"error": tee_result.error} if tee_result.error else {}),
+        },
+        "incognito_router": {
+            "verified": router_result.verified,
+            **(router_result.details if router_result.verified else {}),
+            **({"error": router_result.error} if router_result.error else {}),
+        },
+    }
+
+
 async def trace(query: str, mock: bool = True) -> dict:
     """Run the pipeline step by step, returning all intermediate state.
 
@@ -164,6 +225,12 @@ async def trace(query: str, mock: bool = True) -> dict:
     Sanitization and deterministic leak checks always run for real.
     """
     fixture = _identify_fixture(query)
+
+    # Step 0: Attestation verification
+    if mock:
+        attestation = _mock_attestation()
+    else:
+        attestation = await _live_attestation("nearai/glm-5.3-flash")
 
     # Step 1: Sanitize (always real - regex-based, no LLM)
     sanitized = sanitize(query)
@@ -195,7 +262,7 @@ async def trace(query: str, mock: bool = True) -> dict:
         ]
     else:
         remote_exchanges = [
-            {"sent": frag, "response": "(live Darkbloom response)"}
+            {"sent": frag, "response": "(live Incognito response)"}
             for frag in safe_fragments
         ]
 
@@ -211,6 +278,7 @@ async def trace(query: str, mock: bool = True) -> dict:
         final_answer = final_answer.replace(placeholder, value)
 
     return {
+        "attestation": attestation,
         "query": query,
         "sanitized_text": sanitized.text,
         "placeholder_map": sanitized.placeholder_map.mapping,

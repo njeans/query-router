@@ -1,6 +1,6 @@
 """
 Decompose a sanitized query into 2–3 self-contained, generic sub-questions
-using Tinfoil confidential inference.
+using Near AI attested open-source models.
 """
 
 from __future__ import annotations
@@ -18,10 +18,11 @@ class DecompositionError(Exception):
 async def decompose(
     sanitized_query: SanitizedQuery,
     retry_reason: str | None = None,
+    model: str | None = None,
 ) -> list[str]:
-    """Use the Tinfoil LLM to split the sanitized query into generic sub-questions.
+    """Use the Near AI LLM to split the sanitized query into generic sub-questions.
 
-    Returns a list of 2–3 question strings.
+    Returns a list of 2-3 question strings.
     Raises DecompositionError if the LLM output is invalid.
     """
     if retry_reason:
@@ -37,7 +38,7 @@ async def decompose(
     messages = [{"role": "user", "content": prompt}]
 
     try:
-        result = await local_llm.chat_json(messages, temperature=0.2)
+        result = await local_llm.chat_json(messages, temperature=0.2, model=model)
     except (json.JSONDecodeError, Exception) as e:
         raise DecompositionError(f"LLM returned invalid JSON: {e}") from e
 

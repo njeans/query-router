@@ -35,7 +35,7 @@ async def test_fail_closed_zero_remote_calls(monkeypatch):
     mock_sender = MockRemoteSender()
 
     # Return fragments that always leak entity names → deterministic rejection
-    async def leaky_decompose(sanitized_query, retry_reason=None):
+    async def leaky_decompose(sanitized_query, retry_reason=None, **kwargs):
         return [
             "What should Acme do about this?",
             "Can a cofounder take code from Acme Robotics?",
@@ -43,7 +43,7 @@ async def test_fail_closed_zero_remote_calls(monkeypatch):
 
     monkeypatch.setattr("query_router.router.decompose", leaky_decompose)
 
-    async def mock_fallback(query):
+    async def mock_fallback(query, **kwargs):
         return "Local fallback answer"
 
     monkeypatch.setattr("query_router.router.local_fallback", mock_fallback)
@@ -70,7 +70,7 @@ async def test_force_fail_closed(monkeypatch):
     mock_sender = MockRemoteSender()
 
     # Monkeypatch decompose to return fragments containing original entities
-    async def bad_decompose(sanitized_query, retry_reason=None):
+    async def bad_decompose(sanitized_query, retry_reason=None, **kwargs):
         return [
             "What should Acme Robotics do about IP theft?",
             "Can a cofounder take source code legally?",
@@ -79,7 +79,7 @@ async def test_force_fail_closed(monkeypatch):
     monkeypatch.setattr("query_router.router.decompose", bad_decompose)
 
     # Also mock local_fallback to avoid needing a live LLM
-    async def mock_fallback(query):
+    async def mock_fallback(query, **kwargs):
         return "Local fallback answer"
 
     monkeypatch.setattr("query_router.router.local_fallback", mock_fallback)
@@ -145,18 +145,18 @@ async def test_no_placeholder_values_sent_remotely(name, query, monkeypatch):
         "What steps should someone take to protect their interests?",
     ]
 
-    async def good_decompose(sanitized_query, retry_reason=None):
+    async def good_decompose(sanitized_query, retry_reason=None, **kwargs):
         return list(generic_questions)
 
     monkeypatch.setattr("query_router.router.decompose", good_decompose)
 
-    async def mock_fallback(q):
+    async def mock_fallback(q, **kwargs):
         return "Local fallback answer"
 
     monkeypatch.setattr("query_router.router.local_fallback", mock_fallback)
 
     # Mock recombine to avoid needing a live LLM
-    async def mock_recombine(sanitized_query, fragment_answers):
+    async def mock_recombine(sanitized_query, fragment_answers, **kwargs):
         return "Mock recombined answer"
 
     monkeypatch.setattr("query_router.router.recombine", mock_recombine)

@@ -1,4 +1,4 @@
-"""Integration tests that require Tinfoil API access.
+"""Integration tests that require Near AI API access.
 
 Run with: pytest -m llm
 """

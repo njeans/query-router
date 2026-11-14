@@ -7,7 +7,7 @@ Demo: sends fixture 2 (cofounder IP) through the proxy and prints side by side:
 - Final answer
 
 Usage:
-    python demo.py          # needs Tinfoil API key + optionally Darkbloom
+    python demo.py          # needs NEARAI_API_KEY + NEARAI_INCOGNITO_MODEL
     python demo.py --mock   # fully mocked, no external services needed
 """
 
@@ -131,11 +131,11 @@ async def main():
 
     if result.fragments_sent:
         for i, frag in enumerate(result.fragments_sent, 1):
-            print_section(f"FRAGMENT {i} (sent to Darkbloom)", frag)
+            print_section(f"FRAGMENT {i} (sent to Incognito)", frag)
             if i <= len(result.fragment_answers):
                 print(f"\n  Response: {result.fragment_answers[i-1].answer[:200]}...")
     else:
-        print("\n  (No fragments sent — Tinfoil fallback)")
+        print("\n  (No fragments sent — Near AI fallback)")
 
     if result.fallback_reason:
         print_section("FALLBACK REASON", result.fallback_reason)

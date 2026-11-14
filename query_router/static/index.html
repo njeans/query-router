@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Query Router - Pipeline Demo</title>
+<title>Query Sharding - Pipeline Demo</title>
 <style>
   :root {
     --bg: #0d1117;
@@ -198,16 +198,16 @@
 
   .provider-badge svg { width: 13px; height: 13px; flex-shrink: 0; }
 
-  .provider-badge.tinfoil {
-    background: #0a2a1a;
-    color: #3fb950;
-    border: 1px solid #1a4a2a;
+  .provider-badge.nearai {
+    background: #0a1a2e;
+    color: #56d4dd;
+    border: 1px solid #1a3a4a;
   }
 
-  .provider-badge.darkbloom {
-    background: #0d1e3a;
-    color: #58a6ff;
-    border: 1px solid #1a3a5f;
+  .provider-badge.incognito {
+    background: #1a1a2a;
+    color: #8b8bab;
+    border: 1px solid #2a2a3f;
   }
 
   .step-body { padding: 1.25rem; }
@@ -422,13 +422,138 @@
   }
 
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Model selector */
+  .model-section {
+    margin-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+  .model-section-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+  }
+  .model-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+  .model-row:last-child { margin-bottom: 0; }
+  .frag-label {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    min-width: 78px;
+  }
+  .provider-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    color: #fff;
+    line-height: 1;
+    transition: background 0.2s;
+  }
+  .pdot-Anthropic { background: #d97706; }
+  .pdot-Google { background: #4285f4; }
+  .pdot-OpenAI { background: #10a37f; }
+  .pdot-DeepSeek { background: #0066ff; }
+  .pdot-xAI { background: #666; }
+  .pdot-Qwen { background: #7c3aed; }
+  .pdot-Moonshot { background: #eab308; color: #000; }
+  .pdot-Typesafe { background: #0d9488; }
+  .pdot-NearAI { background: #0a2a3a; color: #56d4dd; border: 1px solid #1a4a5a; }
+  .pdot-Levanto { background: #1a3a2e; color: #3fb950; border: 1px solid #2a5a3e; }
+  .model-select { flex: 1; }
+  .tee-description {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+    font-style: italic;
+  }
+  .exchange-model {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: 0.5rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+  .exchange-model .provider-dot { width: 16px; height: 16px; font-size: 0.5rem; border-radius: 3px; }
+  .confirm-model {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-left: 0.5rem;
+  }
+  .confirm-model .provider-dot { width: 16px; height: 16px; font-size: 0.5rem; border-radius: 3px; }
+
+  /* Attestation step */
+  .attest-group {
+    margin-bottom: 1.25rem;
+  }
+  .attest-group:last-child { margin-bottom: 0; }
+  .attest-group-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .attest-group-title .status {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+  }
+  .attest-group-title .status.ok { background: #0d2818; color: var(--green); }
+  .attest-group-title .status.fail { background: #2d1215; color: var(--red); }
+  .attest-items {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 0.65rem 0.85rem;
+  }
+  .attest-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    padding: 0.2rem 0;
+  }
+  .attest-icon { flex-shrink: 0; font-size: 0.75rem; }
+  .attest-label { color: var(--text-muted); min-width: 100px; }
+  .attest-value { color: var(--text); }
+  .attest-hash {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background: var(--surface);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    word-break: break-all;
+  }
 </style>
 </head>
 <body>
 
 <div class="container">
   <header>
-    <h1>Query Router</h1>
+    <h1>Query Sharding</h1>
     <p>Privacy-Preserving Query Proxy &mdash; Pipeline Demo</p>
   </header>
 
@@ -449,6 +574,34 @@
       <button id="run">Run Pipeline</button>
       <button id="clear" class="btn-secondary">Clear</button>
     </div>
+
+    <div class="model-section">
+      <div class="model-section-title">Private TEE Model &mdash; trusted processing (e2ee)</div>
+      <div class="model-row">
+        <span class="provider-dot pdot-NearAI" id="dot-tee">N</span>
+        <select class="model-select" id="model-tee"></select>
+      </div>
+      <div class="tee-description">Runs in a secure enclave. Not even NEAR AI can see your prompts.</div>
+    </div>
+
+    <div class="model-section">
+      <div class="model-section-title">Incognito Models &mdash; each fragment routes to a different provider</div>
+      <div class="model-row">
+        <span class="frag-label">Fragment 1</span>
+        <span class="provider-dot pdot-Google" id="dot1">G</span>
+        <select class="model-select" id="model1"></select>
+      </div>
+      <div class="model-row">
+        <span class="frag-label">Fragment 2</span>
+        <span class="provider-dot pdot-Anthropic" id="dot2">A</span>
+        <select class="model-select" id="model2"></select>
+      </div>
+      <div class="model-row">
+        <span class="frag-label">Fragment 3</span>
+        <span class="provider-dot pdot-OpenAI" id="dot3">O</span>
+        <select class="model-select" id="model3"></select>
+      </div>
+    </div>
   </div>
 
   <div id="pipeline" class="pipeline"></div>
@@ -464,6 +617,7 @@ const EXAMPLES = {
 };
 
 const STEP_COLORS = {
+  attest:     '#2ea043',
   sanitize:   '#f85149',
   decompose:  '#56d4dd',
   leak_check: '#d29922',
@@ -473,8 +627,8 @@ const STEP_COLORS = {
 };
 
 const PROVIDER_BADGES = {
-  tinfoil: `<span class="provider-badge tinfoil"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0L1 3v5c0 4.1 3 6.7 7 8 4-1.3 7-3.9 7-8V3L8 0z"/></svg>Tinfoil</span>`,
-  darkbloom: `<span class="provider-badge darkbloom"><svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="3"/><circle cx="8" cy="2.5" r="2.2" opacity=".6"/><circle cx="13" cy="5.5" r="2.2" opacity=".6"/><circle cx="11" cy="11.5" r="2.2" opacity=".6"/><circle cx="5" cy="11.5" r="2.2" opacity=".6"/><circle cx="3" cy="5.5" r="2.2" opacity=".6"/></svg>Darkbloom</span>`,
+  nearai: `<span class="provider-badge nearai"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1L2 4.5v7L8 15l6-3.5v-7L8 1zm0 2l4 2.3v4.4L8 12 4 9.7V5.3L8 3z"/></svg>Near AI</span>`,
+  incognito: `<span class="provider-badge incognito"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2C5 2 2.7 4.7 2 6c-.7 1.3 0 0 0 0C2.7 7.3 5 10 8 10s5.3-2.7 6-4c-.7-1.3-3-4-6-4zm0 6.5A2.5 2.5 0 1 1 8 3.5a2.5 2.5 0 0 1 0 5zM1 12h14v1.5H1z"/></svg>Incognito</span>`,
 };
 
 const $examples = document.getElementById('examples');
@@ -497,6 +651,174 @@ $clear.addEventListener('click', () => {
 });
 
 $run.addEventListener('click', runPipeline);
+
+// ---------------------------------------------------------------------------
+// Incognito model catalogue (from Near AI)
+// ---------------------------------------------------------------------------
+const INCOGNITO_MODELS = [
+  {id:'anthropic/claude-fable-5',name:'Claude Fable 5',provider:'Anthropic'},
+  {id:'anthropic/claude-fable-5.1',name:'Claude Fable 5.1',provider:'Anthropic'},
+  {id:'anthropic/claude-fable-5.2',name:'Claude Fable 5.2',provider:'Anthropic'},
+  {id:'anthropic/claude-haiku-4.5',name:'Claude Haiku 4.5',provider:'Anthropic'},
+  {id:'anthropic/claude-haiku-5.5',name:'Claude Haiku 5.5',provider:'Anthropic'},
+  {id:'anthropic/claude-opus-4.6',name:'Claude Opus 4.6',provider:'Anthropic'},
+  {id:'anthropic/claude-opus-4.7',name:'Claude Opus 4.7',provider:'Anthropic'},
+  {id:'anthropic/claude-opus-4.8',name:'Claude Opus 4.8',provider:'Anthropic'},
+  {id:'anthropic/claude-opus-5',name:'Claude Opus 5',provider:'Anthropic'},
+  {id:'anthropic/claude-opus-5.5',name:'Claude Opus 5.5',provider:'Anthropic'},
+  {id:'anthropic/claude-sonnet-4.5',name:'Claude Sonnet 4.5',provider:'Anthropic'},
+  {id:'anthropic/claude-sonnet-4.6',name:'Claude Sonnet 4.6',provider:'Anthropic'},
+  {id:'anthropic/claude-sonnet-5',name:'Claude Sonnet 5',provider:'Anthropic'},
+  {id:'anthropic/claude-sonnet-5.5',name:'Claude Sonnet 5.5',provider:'Anthropic'},
+  {id:'deepseek/deepseek-v4.1-flash',name:'DeepSeek V4.1 Flash',provider:'DeepSeek'},
+  {id:'deepseek/deepseek-v4.1-flash-1017',name:'DeepSeek V4.1 Flash 1017',provider:'DeepSeek'},
+  {id:'google/gemini-2.5-flash',name:'Gemini 2.5 Flash',provider:'Google'},
+  {id:'google/gemini-2.5-flash-lite',name:'Gemini 2.5 Flash Lite',provider:'Google'},
+  {id:'google/gemini-2.5-pro',name:'Gemini 2.5 Pro',provider:'Google'},
+  {id:'google/gemini-3.1-flash-lite',name:'Gemini 3.1 Flash Lite',provider:'Google'},
+  {id:'google/gemini-3.5-flash',name:'Gemini 3.5 Flash',provider:'Google'},
+  {id:'google/gemini-3.8-flash',name:'Gemini 3.8 Flash',provider:'Google'},
+  {id:'moonshot/kimi-k3.1-pro',name:'Kimi K3.1 Pro',provider:'Moonshot AI'},
+  {id:'openai/gpt-4.1',name:'GPT-4.1',provider:'OpenAI'},
+  {id:'openai/gpt-4.1-mini',name:'GPT-4.1 Mini',provider:'OpenAI'},
+  {id:'openai/gpt-5',name:'GPT-5',provider:'OpenAI'},
+  {id:'openai/gpt-5-mini',name:'GPT-5 Mini',provider:'OpenAI'},
+  {id:'openai/gpt-5-nano',name:'GPT-5 Nano',provider:'OpenAI'},
+  {id:'openai/gpt-5.1',name:'GPT-5.1',provider:'OpenAI'},
+  {id:'openai/gpt-5.2',name:'GPT-5.2',provider:'OpenAI'},
+  {id:'openai/gpt-5.4',name:'GPT-5.4',provider:'OpenAI'},
+  {id:'openai/gpt-5.4-mini',name:'GPT-5.4 Mini',provider:'OpenAI'},
+  {id:'openai/gpt-5.4-nano',name:'GPT-5.4 Nano',provider:'OpenAI'},
+  {id:'openai/gpt-5.5',name:'GPT-5.5',provider:'OpenAI'},
+  {id:'openai/gpt-5.6-luna',name:'GPT-5.6 Luna',provider:'OpenAI'},
+  {id:'openai/gpt-5.6-sol',name:'GPT-5.6 Sol',provider:'OpenAI'},
+  {id:'openai/gpt-6-astra',name:'GPT-6 Astra',provider:'OpenAI'},
+  {id:'openai/gpt-6-luna',name:'GPT-6 Luna',provider:'OpenAI'},
+  {id:'openai/gpt-6-sol',name:'GPT-6 Sol',provider:'OpenAI'},
+  {id:'openai/gpt-6.1-sol',name:'GPT-6.1 Sol',provider:'OpenAI'},
+  {id:'openai/o3',name:'o3',provider:'OpenAI'},
+  {id:'openai/o3-mini',name:'o3 Mini',provider:'OpenAI'},
+  {id:'openai/o4-mini',name:'o4 Mini',provider:'OpenAI'},
+  {id:'qwen/qwen3.7-max',name:'Qwen3.7 Max',provider:'Qwen'},
+  {id:'typesafe/jev-1.13',name:'Jev 1.13',provider:'Typesafe'},
+  {id:'xai/grok-4.6',name:'Grok 4.6',provider:'xAI'},
+  {id:'xai/grok-4.7',name:'Grok 4.7',provider:'xAI'},
+];
+
+// ---------------------------------------------------------------------------
+// Private TEE model catalogue (from Near AI)
+// ---------------------------------------------------------------------------
+const TEE_MODELS = [
+  {id:'nearai/deepseek-v4.1-flash-1017',name:'DeepSeek V4.1 Flash 1017',provider:'NEAR AI'},
+  {id:'nearai/deepseek-v4.1-flash-1017-abliterated',name:'DeepSeek V4.1 Flash 1017 Abliterated',provider:'NEAR AI'},
+  {id:'nearai/glm-5.3-flash',name:'GLM 5.3 Flash',provider:'NEAR AI'},
+  {id:'nearai/qwen-3.6-35b-a3b-fp8',name:'Qwen 3.6 35B A3B FP8',provider:'NEAR AI'},
+  {id:'nearai/qwen-3.8-27b',name:'Qwen 3.8 27B',provider:'NEAR AI'},
+  {id:'nearai/qwen-3.8-27b-abliterated',name:'Qwen 3.8 27B Abliterated',provider:'NEAR AI'},
+  {id:'nearai/qwen3-vl-30b-a3b-instruct',name:'Qwen3-VL-30B-A3B-Instruct',provider:'NEAR AI'},
+  {id:'levanto/levanto-sage-2',name:'Levanto Sage 2',provider:'Levanto'},
+];
+
+const TEE_DEFAULT = 'nearai/glm-5.3-flash';
+
+const PROVIDER_LETTER = {
+  'Anthropic':'A','Google':'G','OpenAI':'O','DeepSeek':'D',
+  'xAI':'X','Qwen':'Q','Moonshot AI':'M','Typesafe':'T',
+  'NEAR AI':'N','Levanto':'L',
+};
+const PROVIDER_CSS = {
+  'Anthropic':'pdot-Anthropic','Google':'pdot-Google','OpenAI':'pdot-OpenAI',
+  'DeepSeek':'pdot-DeepSeek','xAI':'pdot-xAI','Qwen':'pdot-Qwen',
+  'Moonshot AI':'pdot-Moonshot','Typesafe':'pdot-Typesafe',
+  'NEAR AI':'pdot-NearAI','Levanto':'pdot-Levanto',
+};
+
+const MODEL_DEFAULTS = [
+  'google/gemini-2.5-flash',
+  'anthropic/claude-sonnet-4.6',
+  'openai/gpt-4.1-mini',
+];
+
+function dotHtml(provider, sm) {
+  const cls = PROVIDER_CSS[provider] || '';
+  const letter = PROVIDER_LETTER[provider] || '?';
+  const style = sm ? 'width:16px;height:16px;font-size:0.5rem;border-radius:3px;' : '';
+  return `<span class="provider-dot ${cls}" style="${style}">${letter}</span>`;
+}
+
+function populateModelDropdowns() {
+  const providers = [...new Set(INCOGNITO_MODELS.map(m => m.provider))];
+  for (let i = 1; i <= 3; i++) {
+    const sel = document.getElementById('model' + i);
+    sel.innerHTML = '';
+    providers.forEach(p => {
+      const grp = document.createElement('optgroup');
+      grp.label = p;
+      INCOGNITO_MODELS.filter(m => m.provider === p).forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = m.name;
+        grp.appendChild(opt);
+      });
+      sel.appendChild(grp);
+    });
+    sel.value = MODEL_DEFAULTS[i - 1];
+    sel.addEventListener('change', () => updateDot(i));
+  }
+}
+
+function updateDot(i) {
+  const sel = document.getElementById('model' + i);
+  const model = INCOGNITO_MODELS.find(m => m.id === sel.value);
+  const dot = document.getElementById('dot' + i);
+  if (model) {
+    dot.className = 'provider-dot ' + (PROVIDER_CSS[model.provider] || '');
+    dot.textContent = PROVIDER_LETTER[model.provider] || '?';
+  }
+}
+
+function getSelectedModels() {
+  return [1, 2, 3].map(i => {
+    const sel = document.getElementById('model' + i);
+    return INCOGNITO_MODELS.find(m => m.id === sel.value)
+      || {id: sel.value, name: sel.value, provider: 'Unknown'};
+  });
+}
+
+populateModelDropdowns();
+
+function populateTeeDropdown() {
+  const sel = document.getElementById('model-tee');
+  const dot = document.getElementById('dot-tee');
+  const providers = [...new Set(TEE_MODELS.map(m => m.provider))];
+  providers.forEach(p => {
+    const grp = document.createElement('optgroup');
+    grp.label = p;
+    TEE_MODELS.filter(m => m.provider === p).forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.id;
+      opt.textContent = m.name;
+      grp.appendChild(opt);
+    });
+    sel.appendChild(grp);
+  });
+  sel.value = TEE_DEFAULT;
+  sel.addEventListener('change', () => {
+    const model = TEE_MODELS.find(m => m.id === sel.value);
+    if (model) {
+      dot.className = 'provider-dot ' + (PROVIDER_CSS[model.provider] || '');
+      dot.textContent = PROVIDER_LETTER[model.provider] || '?';
+    }
+  });
+}
+
+function getSelectedTeeModel() {
+  const sel = document.getElementById('model-tee');
+  return TEE_MODELS.find(m => m.id === sel.value)
+    || {id: sel.value, name: sel.value, provider: 'NEAR AI'};
+}
+
+populateTeeDropdown();
 
 async function runPipeline() {
   const query = $query.value.trim();
@@ -525,6 +847,7 @@ function renderPipeline(data) {
 
   // Steps before the confirmation gate
   const preSteps = [
+    () => renderAttestation(data),
     () => renderSanitize(data),
     () => renderDecompose(data),
     () => renderLeakCheck(data),
@@ -606,9 +929,67 @@ function highlightPlaceholders(text) {
   });
 }
 
+function renderAttestation(data) {
+  const att = data.attestation || {};
+  const tee = att.tee || {};
+  const router = att.incognito_router || {};
+  const allOk = tee.verified && router.verified;
+  const teeName = getSelectedTeeModel().name;
+  const step = makeStep(1, 'Verify Attestation', allOk ? 'All verified' : 'Verification issue', STEP_COLORS.attest);
+
+  function status(ok) {
+    return ok
+      ? '<span class="status ok">Verified</span>'
+      : '<span class="status fail">Failed</span>';
+  }
+  function item(ok, label, value) {
+    const icon = ok ? '\u2705' : '\u274c';
+    return `<div class="attest-item"><span class="attest-icon">${icon}</span><span class="attest-label">${label}</span><span class="attest-value">${value}</span></div>`;
+  }
+  function hashItem(label, hash) {
+    return `<div class="attest-item"><span class="attest-icon">\u2705</span><span class="attest-label">${label}</span><span class="attest-hash">${esc(hash)}</span></div>`;
+  }
+
+  const enc = tee.enclave || {};
+  const tCert = tee.certificate || {};
+  const e2ee = tee.e2ee || {};
+  const rRouting = router.routing || {};
+  const rCert = router.certificate || {};
+
+  let html = '';
+
+  // TEE group
+  html += '<div class="attest-group">';
+  html += `<div class="attest-group-title">${dotHtml('NEAR AI', true)} Private TEE \u2014 ${esc(teeName)} ${status(tee.verified)}</div>`;
+  html += '<div class="attest-items">';
+  if (enc.type) html += item(true, 'Enclave', esc(enc.type));
+  if (enc.measurement) html += hashItem('Measurement', enc.measurement);
+  if (enc.firmware) html += item(true, 'Firmware', esc(enc.firmware));
+  if (tCert.issuer) html += item(tCert.chain_verified, 'Certificate', `${esc(tCert.issuer)} (${tCert.chain_verified ? 'valid chain' : 'invalid'})`);
+  if (e2ee.protocol) html += item(e2ee.verified, 'E2EE', `${esc(e2ee.protocol)} + ${esc(e2ee.key_exchange || '')}`);
+  if (tee.error) html += item(false, 'Error', esc(tee.error));
+  html += '</div></div>';
+
+  // Incognito Router group
+  html += '<div class="attest-group">';
+  html += `<div class="attest-group-title"><span class="provider-badge incognito" style="font-size:0.6rem;padding:0.1rem 0.4rem;"><svg viewBox="0 0 16 16" fill="currentColor" style="width:11px;height:11px;"><path d="M8 2C5 2 2.7 4.7 2 6c-.7 1.3 0 0 0 0C2.7 7.3 5 10 8 10s5.3-2.7 6-4c-.7-1.3-3-4-6-4zm0 6.5A2.5 2.5 0 1 1 8 3.5a2.5 2.5 0 0 1 0 5zM1 12h14v1.5H1z"/></svg></span> Incognito Router ${status(router.verified)}</div>`;
+  html += '<div class="attest-items">';
+  if (router.gateway) html += item(true, 'Gateway', esc(router.gateway));
+  if (rRouting.fragment_isolation !== undefined) html += item(rRouting.fragment_isolation, 'Isolation', 'Fragment isolation between providers');
+  if (rRouting.no_shared_context !== undefined) html += item(rRouting.no_shared_context, 'Context', 'No shared conversation context');
+  if (rRouting.no_linking_metadata !== undefined) html += item(rRouting.no_linking_metadata, 'Metadata', 'No linking metadata between requests');
+  if (rCert.issuer) html += item(rCert.chain_verified, 'Certificate', `${esc(rCert.issuer)} (${rCert.chain_verified ? 'valid chain' : 'invalid'})`);
+  if (router.error) html += item(false, 'Error', esc(router.error));
+  html += '</div></div>';
+
+  step._body.innerHTML = html;
+  return step;
+}
+
 function renderSanitize(data) {
   const count = Object.keys(data.placeholder_map).length;
-  const step = makeStep(1, 'Sanitize', `${count} entities detected`, STEP_COLORS.sanitize, 'tinfoil');
+  const tee = getSelectedTeeModel();
+  const step = makeStep(2, 'Sanitize', `${count} entities detected · ${tee.name}`, STEP_COLORS.sanitize, 'nearai');
 
   let html = `<div class="sanitized-text">${highlightPlaceholders(esc(data.sanitized_text))}</div>`;
 
@@ -627,7 +1008,8 @@ function renderSanitize(data) {
 }
 
 function renderDecompose(data) {
-  const step = makeStep(2, 'Decompose', `${data.fragments.length} sub-questions`, STEP_COLORS.decompose, 'tinfoil');
+  const tee = getSelectedTeeModel();
+  const step = makeStep(3, 'Decompose', `${data.fragments.length} sub-questions · ${tee.name}`, STEP_COLORS.decompose, 'nearai');
   let html = '';
   data.fragments.forEach((f, i) => {
     html += `<div class="fragment-card"><div class="fragment-label" style="color:var(--teal)">Fragment ${i + 1}</div>${esc(f)}</div>`;
@@ -640,8 +1022,9 @@ function renderLeakCheck(data) {
   const passed = data.leak_checks.filter(r => r.passed).length;
   const total = data.leak_checks.length;
   const allPassed = passed === total;
-  const subtitle = allPassed ? `${passed}/${total} passed` : `${passed}/${total} passed`;
-  const step = makeStep(3, 'Leak Check', subtitle, STEP_COLORS.leak_check, 'tinfoil');
+  const tee = getSelectedTeeModel();
+  const subtitle = `${passed}/${total} passed · ${tee.name}`;
+  const step = makeStep(4, 'Leak Check', subtitle, STEP_COLORS.leak_check, 'nearai');
 
   let html = '';
   data.leak_checks.forEach((r, i) => {
@@ -660,20 +1043,22 @@ function renderLeakCheck(data) {
 
 function renderConfirm(data) {
   const safeCount = data.leak_checks.filter(r => r.passed).length;
-  const step = makeStep(4, 'Confirm', `${safeCount} fragments ready to send`, STEP_COLORS.confirm);
+  const step = makeStep(5, 'Confirm', `${safeCount} fragments ready to send`, STEP_COLORS.confirm);
 
-  let html = '<div style="color:var(--text-muted);margin-bottom:1rem;">These fragments will be sent to Darkbloom as separate, unlinkable requests. Review them before approving.</div>';
+  let html = '<div style="color:var(--text-muted);margin-bottom:1rem;">These fragments will be sent to Near AI Incognito as separate, unlinkable requests. Review them before approving.</div>';
 
+  const selModels = getSelectedModels();
   data.leak_checks.forEach((r, i) => {
     if (!r.passed) return;
+    const m = selModels[i] || selModels[0];
     html += `<div class="fragment-card safe">`;
-    html += `<div class="fragment-label safe">Fragment ${i + 1}</div>`;
+    html += `<div class="fragment-label safe">Fragment ${i + 1}<span class="confirm-model">\u2192 ${dotHtml(m.provider, true)} ${esc(m.name)}</span></div>`;
     html += esc(r.text);
     html += '</div>';
   });
 
   if (safeCount === 0) {
-    html += '<div class="rejected-banner">No safe fragments \u2014 pipeline will fall back to Tinfoil-only.</div>';
+    html += '<div class="rejected-banner">No safe fragments \u2014 pipeline will fall back to Near AI-only.</div>';
   } else {
     html += '<div class="confirm-actions">';
     html += '<button class="btn-approve" id="btn-approve">\u2713 Approve &amp; Send</button>';
@@ -708,7 +1093,7 @@ function renderConfirm(data) {
         if (note) note.remove();
         const banner = document.createElement('div');
         banner.className = 'rejected-banner';
-        banner.textContent = 'Rejected \u2014 zero fragments sent. Pipeline falls back to Tinfoil-only.';
+        banner.textContent = 'Rejected \u2014 zero fragments sent. Pipeline falls back to Near AI-only.';
         step._body.appendChild(banner);
       });
     }
@@ -719,7 +1104,8 @@ function renderConfirm(data) {
 
 function renderRemote(data) {
   const n = data.remote_exchanges.length;
-  const step = makeStep(5, 'Remote Send', `${n} fragments sent`, STEP_COLORS.remote, 'darkbloom');
+  const selModels = getSelectedModels();
+  const step = makeStep(6, 'Remote Send', `${n} fragments \u2192 ${n} providers`, STEP_COLORS.remote, 'incognito');
 
   if (n === 0) {
     step._body.innerHTML = '<div style="color:var(--text-muted);font-style:italic">No fragments sent \u2014 all failed leak check.</div>';
@@ -728,8 +1114,9 @@ function renderRemote(data) {
 
   let html = '';
   data.remote_exchanges.forEach((ex, i) => {
+    const m = selModels[i] || selModels[0];
     html += '<div class="exchange">';
-    html += `<div class="exchange-sent"><div class="exchange-label sent">\u2191 Sent (Fragment ${i + 1})</div>${esc(ex.sent)}</div>`;
+    html += `<div class="exchange-sent"><div class="exchange-label sent">\u2191 Sent (Fragment ${i + 1})<span class="exchange-model">${dotHtml(m.provider, true)} ${esc(m.provider)} &mdash; ${esc(m.name)}</span></div>${esc(ex.sent)}</div>`;
     html += `<div class="exchange-recv"><div class="exchange-label recv">\u2193 Response</div>${esc(ex.response)}</div>`;
     html += '</div>';
   });
@@ -739,7 +1126,9 @@ function renderRemote(data) {
 }
 
 function renderRecombine(data) {
-  const step = makeStep(6, 'Recombine', data.tier === 'split' ? 'Merged & de-placeholdered' : 'Fallback', STEP_COLORS.recombine, 'tinfoil');
+  const tee = getSelectedTeeModel();
+  const label = data.tier === 'split' ? 'Merged & de-placeholdered' : 'Fallback';
+  const step = makeStep(7, 'Recombine', `${label} · ${tee.name}`, STEP_COLORS.recombine, 'nearai');
 
   let html = '';
 

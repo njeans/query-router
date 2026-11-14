@@ -7,7 +7,7 @@ adversary LLM only the fragments and asks it to reconstruct the original
 question and every specific entity. Reports a markdown table.
 
 Usage:
-    python eval_split_leakage.py          # uses Tinfoil LLM
+    python eval_split_leakage.py          # uses Near AI LLM
     python eval_split_leakage.py --mock   # uses mock decomposition (no LLM needed)
 """
 
